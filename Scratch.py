@@ -8,14 +8,19 @@ from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
-data = pd.read_csv('default_cc_train.csv')
+dat = pd.read_csv('default_cc_train.csv')
+
+sns.countplot("default.payment.next.month", data = dat, hue = "SEX")#Total defaulted
+plt.title("Total Defaulted in Data by Sex")
+plt.xlabel("Defaulted");
+
 
 
 
 # =============================================================================
 # This research employed a binary variable, default payment (Yes = 1, No = 0), as the response variable. This study reviewed the literature and used the following 23 variables as explanatory variables:
 # X1: Amount of the given credit (NT dollar): it includes both the individual consumer credit and his/her family (supplementary) credit.
-# X2: Gender (1 = male; 2 = female).
+# X2: Sex (1 = male; 2 = female).
 # X3: Education (1 = graduate school; 2 = university; 3 = high school; 4 = others).
 # X4: Marital status (1 = married; 2 = single; 3 = others).
 # X5: Age (year).
