@@ -10,7 +10,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 data = pd.read_csv('default_cc_train.csv')
 
-
+sns.countplot("default.payment.next.month", data = dat, hue = "SEX")
 
 # =============================================================================
 # This research employed a binary variable, default payment (Yes = 1, No = 0), as the response variable. This study reviewed the literature and used the following 23 variables as explanatory variables:
