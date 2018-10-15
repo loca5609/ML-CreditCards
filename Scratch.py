@@ -14,6 +14,7 @@ sns.countplot("default.payment.next.month", data = dat, hue = "SEX",palette="Set
 plt.title("Defaulted by Sex")
 plt.xlabel("Defaulted");
 
+sns.set(rc={'axes.facecolor':'#ffc6ed', 'figure.facecolor':'white'})
 
 sns.violinplot("SEX","AGE", data = dat,palette="Set3")
 plt.title("Violin Plot of Age range for each Sex");
@@ -21,9 +22,7 @@ plt.title("Violin Plot of Age range for each Sex");
 sns.violinplot("default.payment.next.month","AGE", data = dat,palette="Set2")
 plt.title("Violin Plot of Age range by Default");
 
-
 violin = sns.violinplot(x="MARRIAGE",y="default.payment.next.month", hue="SEX", data=dat)
-
 
 # =============================================================================
 # This research employed a binary variable, default payment (Yes = 1, No = 0), as the response variable. This study reviewed the literature and used the following 23 variables as explanatory variables:
