@@ -8,6 +8,11 @@ from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score
 from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV
+
+
+
+
 
 dat = pd.read_csv("C:/Users/Yayoi/Documents/ML-CreditCards/default_cc_train.csv")
 
@@ -29,11 +34,12 @@ y  = dat.ix[:,24]
 
 X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.33)
 
+# Preform Grid Search on SVC 
+parameters = {'kernel':('linear', 'rbf'), 'C':[1, 10]}
 svm = SVC()
+clf = GridSearchCV(svm,parameters)
 
-svm.fit(X_train,y_train)
-predicts = svm.predict(X_test)
+#training and predictions for Grid Searched SVC
+clf.fit(X_train,y_train)
+predicts = clf.predict(X_test)
 accuracy = accuracy_score(y_test,predicts)
-
-
-
