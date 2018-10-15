@@ -41,5 +41,5 @@ clf = GridSearchCV(svm,parameters)
 
 #training and predictions for Grid Searched SVC
 clf.fit(X_train,y_train)
-predicts = clf.predict(X_test)
+mpredicts = clf.predict(X_test)
 accuracy = accuracy_score(y_test,predicts)
