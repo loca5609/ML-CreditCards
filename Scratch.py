@@ -8,9 +8,19 @@ from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
-data = pd.read_csv('default_cc_train.csv')
+dat = pd.read_csv('default_cc_train.csv')
 
-sns.countplot("default.payment.next.month", data = dat, hue = "SEX")
+sns.countplot("default.payment.next.month", data = dat, hue = "SEX",palette="Set3")
+plt.title("Defaulted by Sex")
+plt.xlabel("Defaulted");
+
+
+sns.violinplot("SEX","AGE", data = dat,palette="Set3")
+plt.title("Violin Plot of Age range for each Sex");
+
+sns.violinplot("default.payment.next.month","AGE", data = dat,palette="Set2")
+plt.title("Violin Plot of Age range by Default");
+
 
 # =============================================================================
 # This research employed a binary variable, default payment (Yes = 1, No = 0), as the response variable. This study reviewed the literature and used the following 23 variables as explanatory variables:
