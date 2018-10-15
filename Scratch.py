@@ -21,7 +21,8 @@ plt.title("Violin Plot of Age range for each Sex");
 sns.violinplot("default.payment.next.month","AGE", data = dat,palette="Set2")
 plt.title("Violin Plot of Age range by Default");
 
-violin = sns.violinplot(x="MARRIAGE",y="default.payment.next.month", hue="SEX", data=data)
+
+violin = sns.violinplot(x="MARRIAGE",y="default.payment.next.month", hue="SEX", data=dat)
 
 
 # =============================================================================
