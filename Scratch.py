@@ -6,7 +6,7 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score
 from sklearn.svm import SVC
 
 dat = pd.read_csv("C:/Users/Yayoi/Documents/ML-CreditCards/default_cc_train.csv")
@@ -31,4 +31,8 @@ X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.33)
 
 svm = SVC()
 
+svm.fit(X_train,y_train)
 
+predicts = svm.predict(X_test)
+
+accuracy = accuracy_score(y_test,predicts)
