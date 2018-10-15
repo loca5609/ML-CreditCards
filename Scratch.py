@@ -1,9 +1,17 @@
-# erik's initial test. Y'all can delete. just testing git
-
+import numpy as np 
 import pandas as pd
-import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression, Ridge
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.svm import SVC
 
-dat =  pd.read_csv("C:/Users/Yayoi/Documents/ML-CreditCards/default_cc_train.csv")
+dat = pd.read_csv("C:/Users/Yayoi/Documents/ML-CreditCards/default_cc_train.csv")
+
+sns.countplot("default.payment.next.month", data = dat, hue = "SEX")
 
 # =============================================================================
 # This research employed a binary variable, default payment (Yes = 1, No = 0), as the response variable. This study reviewed the literature and used the following 23 variables as explanatory variables:
@@ -16,5 +24,11 @@ dat =  pd.read_csv("C:/Users/Yayoi/Documents/ML-CreditCards/default_cc_train.csv
 # X12-X17: Amount of bill statement (NT dollar). X12 = amount of bill statement in September, 2005; X13 = amount of bill statement in August, 2005; . . .; X17 = amount of bill statement in April, 2005.
 # X18-X23: Amount of previous payment (NT dollar). X18 = amount paid in September, 2005; X19 = amount paid in August, 2005; . . .;X23 = amount paid in April, 2005 
 # =============================================================================
+X = dat.loc[:, dat.columns != "default.payment.next.month"]
+y  = dat.ix[:,24]
+
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.33)
+
+svm = SVC()
 
 
