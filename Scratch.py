@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression, Ridge
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression, Ridge, LogisticRegression
+from sklearn.ensemble import RandomForestRegressor, VotingClassifier, GradientBoostingClassifier
 from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
@@ -73,3 +73,30 @@ print("The accuracy of our Support Vector Classifier is: " + str(accuracy))
 # X18-X23: Amount of previous payment (NT dollar). X18 = amount paid in September, 2005; X19 = amount paid in August, 2005; . . .;X23 = amount paid in April, 2005 
 # =============================================================================
 
+# Raw Logistic Regression
+log_clf = LogisticRegression()
+log_clf.fit(X_train, y_train)
+log_predicts = log_clf.predict(X_test)
+
+log_acc = accuracy_score(log_predicts,y_test)
+print("The accuracy of Logistic Regression is: ", log_acc)
+# ~77.8% (bad)
+
+rf_clf = RandomForestClassifier(n_estimators=50,random_state=1)
+rf_clf.fit(X_train, y_train)
+rf_predicts = rf_clf.predict(X_test)
+
+rf_acc = accuracy_score(rf_predicts,y_test)
+print("The accuracy of Random Forest Classification is: ", rf_acc)
+# ~81.2%
+
+grad_clf = GradientBoostingClassifier(n_estimators=150,learning_rate=0.1,max_depth=2,loss="deviance")
+grad_clf.fit(X_train,y_train)
+grad_predicts = grad_clf.predict(X_test)
+
+grad_acc = accuracy_score(grad_predicts,y_test)
+grad_mse = mean_squared_error(grad_predicts,y_test)
+
+print("The MSE for Gradient Boosting is : ", grad_mse)
+print("The accuracy of Gradient Boosted Classification is: ", grad_acc)
+# ~82 %s
