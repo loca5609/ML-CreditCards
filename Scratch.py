@@ -6,9 +6,16 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score
+from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV
 
 dat = pd.read_csv('default_cc_train.csv')
+
+datCat = pd.DataFrame(dat[["SEX","EDUCATION", "MARRIAGE", "PAY_0", "PAY_2", "PAY_3", "PAY_4", "PAY_5"]])
+datNum = pd.DataFrame(dat[["LIMIT_BAL","BILL_AMT1","BILL_AMT2","BILL_AMT3","BILL_AMT4", "BILL_AMT5", "BILL_AMT6", "PAY_AMT1","PAY_AMT2","PAY_AMT3", "PAY_AMT4", "PAY_AMT5","PAY_AMT6"]])
+
+
 
 sns.countplot("default.payment.next.month", data = dat, hue = "SEX",palette="Set3")
 plt.title("Defaulted by Sex")
@@ -23,6 +30,35 @@ plt.title("Violin Plot of Age range by Default");
 
 
 violin = sns.violinplot(x="MARRIAGE",y="default.payment.next.month", hue="SEX", data=dat)
+
+
+# Preprocesing
+#Getting rid of 0's in Marriage
+dat = dat[dat.MARRIAGE != 0]
+
+#getting rid of 0,5,6 in Education
+for i in [0,5,6]:
+    dat.EDUCATION.replace(i,4)
+    
+#Scale data 
+
+   
+X = dat.loc[:, dat.columns != "default.payment.next.month"]
+y  = dat.iloc[:,24]
+
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.33)
+
+
+svm = SVC()
+
+# Training and predictions SVC
+svm.fit(X_train,y_train)
+predicts = svm.predict(X_test)
+accuracy = accuracy_score(y_test,predicts)
+print("The accuracy of our Support Vector Classifier is: " + str(accuracy))
+
+#next Scale data and rerun
+
 
 
 # =============================================================================
