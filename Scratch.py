@@ -9,11 +9,11 @@ from sklearn.ensemble import RandomForestRegressor, VotingClassifier, GradientBo
 from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import Imputer, StandardScaler
+from sklearn.pipeline import FeatureUnion, Pipeline
+from sklearn.base import BaseEstimator, TransformerMixin
 
 dat = pd.read_csv('default_cc_train.csv')
-
-datCat = pd.DataFrame(dat[["SEX","EDUCATION", "MARRIAGE", "PAY_0", "PAY_2", "PAY_3", "PAY_4", "PAY_5"]])
-datNum = pd.DataFrame(dat[["LIMIT_BAL","BILL_AMT1","BILL_AMT2","BILL_AMT3","BILL_AMT4", "BILL_AMT5", "BILL_AMT6", "PAY_AMT1","PAY_AMT2","PAY_AMT3", "PAY_AMT4", "PAY_AMT5","PAY_AMT6"]])
 
 
 
@@ -33,16 +33,78 @@ violin = sns.violinplot(x="MARRIAGE",y="default.payment.next.month", hue="SEX", 
 
 
 # Preprocesing
+
 #Getting rid of 0's in Marriage
 dat = dat[dat.MARRIAGE != 0]
 
 #getting rid of 0,5,6 in Education
 for i in [0,5,6]:
     dat.EDUCATION.replace(i,4)
+ 
+    
+datCat = pd.DataFrame(dat[["SEX","EDUCATION", "MARRIAGE", "PAY_0", "PAY_2", "PAY_3", "PAY_4", "PAY_5"]])
+datNum = pd.DataFrame(dat[["LIMIT_BAL","BILL_AMT1","BILL_AMT2","BILL_AMT3","BILL_AMT4", "BILL_AMT5", "BILL_AMT6", "PAY_AMT1","PAY_AMT2","PAY_AMT3", "PAY_AMT4", "PAY_AMT5","PAY_AMT6"]])
+
+catName = ["SEX","EDUCATION", "MARRIAGE", "PAY_0", "PAY_2", "PAY_3", "PAY_4", "PAY_5"]
+
+numName= ["LIMIT_BAL","BILL_AMT1","BILL_AMT2","BILL_AMT3","BILL_AMT4", "BILL_AMT5", "BILL_AMT6", "PAY_AMT1","PAY_AMT2","PAY_AMT3", "PAY_AMT4", "PAY_AMT5","PAY_AMT6"]
+
+
+datUse = dat[["SEX","EDUCATION", "MARRIAGE", "PAY_0", "PAY_2", "PAY_3", "PAY_4", "PAY_5","LIMIT_BAL","BILL_AMT1","BILL_AMT2","BILL_AMT3","BILL_AMT4", "BILL_AMT5", "BILL_AMT6", "PAY_AMT1","PAY_AMT2","PAY_AMT3", "PAY_AMT4", "PAY_AMT5","PAY_AMT6"]]
+
+    
     
 #Scale data 
+class DataSelect(BaseEstimator,TransformerMixin):
+    def __init__(self, colNames):
+        self.colNames = colNames
+    def fit(self,X,y=None):
+        return self
+    def transform(self,X):
+        return  X[self.colNames]
 
-   
+
+#Getting rid of NA's for numerical data
+pipeNumeric = Pipeline([
+ ("select_cols", DataSelect(numName)),
+ ("z-scaling", StandardScaler())
+ ])
+pipNum = pipeNumeric.fit_transform(datNum)
+
+#Need to deal with strings in categorical before putting in piepline so use get_dummies
+
+class DumCat(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        """Adding dummies when needed"""
+    def fit(self, X,y=None):
+        self.dummyDat = pd.get_dummies(X) #Creating dataFrame to run the function
+        return self
+    def transform(self,X):
+        return self.dummyDat #return the dummyDat that has the new columns
+
+
+#to access, need to Class.fit_transform(dataWantChanged)
+
+
+#Getting rid of NA's for categorical data
+pipeCategory = Pipeline([
+ ("select_cols", DataSelect(catName)),
+ ("get_dummies", DumCat()),
+ ])
+pipCat = pipeCategory.fit_transform(datCat)
+
+
+#Now that the data is processed, need to join the Numerical and Categorical 
+
+full_pipeline = FeatureUnion(transformer_list=[
+         ('cat_data',pipeCategory),
+        ('num_data',pipeNumeric)
+        ])
+united = full_pipeline.fit_transform(datUse)
+united
+
+
+# SVM w/o scaling
 X = dat.loc[:, dat.columns != "default.payment.next.month"]
 y  = dat.iloc[:,24]
 
@@ -56,9 +118,23 @@ svm.fit(X_train,y_train)
 predicts = svm.predict(X_test)
 accuracy = accuracy_score(y_test,predicts)
 print("The accuracy of our Support Vector Classifier is: " + str(accuracy))
+#.78105
 
-#next Scale data and rerun
+#Scaled Data SVM   
+X = united
+y  = dat.iloc[:,24]
 
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.33)
+
+
+svm = SVC()
+
+# Training and predictions SVC
+svm.fit(X_train,y_train)
+predicts = svm.predict(X_test)
+accuracy = accuracy_score(y_test,predicts)
+print("The accuracy of our Support Vector Classifier is: " + str(accuracy))
+#.81894
 
 
 # =============================================================================
