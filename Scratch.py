@@ -3,9 +3,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn import datasets
+from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Ridge, LogisticRegression
-from sklearn.ensemble import RandomForestRegressor, VotingClassifier, GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier, GradientBoostingClassifier
 from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
@@ -13,7 +14,7 @@ from sklearn.preprocessing import Imputer, StandardScaler
 from sklearn.pipeline import FeatureUnion, Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 
-dat = pd.read_csv('default_cc_train.csv')
+dat = pd.read_csv('C:/Users/Yayoi/Documents/ML-CreditCards/default_cc_train.csv')
 
 
 
@@ -111,30 +112,7 @@ y  = dat.iloc[:,24]
 X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.33)
 
 
-svm = SVC()
 
-# Training and predictions SVC
-svm.fit(X_train,y_train)
-predicts = svm.predict(X_test)
-accuracy = accuracy_score(y_test,predicts)
-print("The accuracy of our Support Vector Classifier is: " + str(accuracy))
-#.78105
-
-#Scaled Data SVM   
-X = united
-y  = dat.iloc[:,24]
-
-X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.33)
-
-
-svm = SVC()
-
-# Training and predictions SVC
-svm.fit(X_train,y_train)
-predicts = svm.predict(X_test)
-accuracy = accuracy_score(y_test,predicts)
-print("The accuracy of our Support Vector Classifier is: " + str(accuracy))
-#.81894
 
 
 # =============================================================================
@@ -149,30 +127,102 @@ print("The accuracy of our Support Vector Classifier is: " + str(accuracy))
 # X18-X23: Amount of previous payment (NT dollar). X18 = amount paid in September, 2005; X19 = amount paid in August, 2005; . . .;X23 = amount paid in April, 2005 
 # =============================================================================
 
+
+# Scaled Data SVM   
+X = united
+y  = dat.iloc[:,24]
+
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.33)
+
+
+# PCA to reduce dimensions 
+pca = PCA(n_components=0.99)
+pca.fit(X_train)
+cumsum = np.cumsum(pca.explained_variance_ratio_)
+d = np.argmax(cumsum >= 0.95) + 1
+print(str(d) + " dimensions explain 95% of our data.")
+d = np.argmax(cumsum >= 0.99) + 1
+print(str(d) + " dimensions explain 99% of our data.")
+
+# this is the reduced dimension set, use this to train all our models 
+X_train_reduced = pca.transform(X_train)
+X_test_reduced = pca.transform(X_test)
+
+
+# CLASSIFIERS
+
+# Training and predictions SVC
+svm = SVC()
+svm.fit(X_train_reduced,y_train)
+predicts = svm.predict(X_test_reduced)
+accuracy = accuracy_score(y_test,predicts)
+print("The accuracy of our Support Vector Classifier is: " + str(accuracy))
+#.81894
+
+
 # Raw Logistic Regression
 log_clf = LogisticRegression()
-log_clf.fit(X_train, y_train)
-log_predicts = log_clf.predict(X_test)
+log_clf.fit(X_train_reduced, y_train)
+log_predicts = log_clf.predict(X_test_reduced)
 
 log_acc = accuracy_score(log_predicts,y_test)
 print("The accuracy of Logistic Regression is: ", log_acc)
 # ~77.8% (bad)
 
+
+# Random Forest Classification
 rf_clf = RandomForestClassifier(n_estimators=50,random_state=1)
-rf_clf.fit(X_train, y_train)
-rf_predicts = rf_clf.predict(X_test)
+rf_clf.fit(X_train_reduced, y_train)
+rf_predicts = rf_clf.predict(X_test_reduced)
 
 rf_acc = accuracy_score(rf_predicts,y_test)
 print("The accuracy of Random Forest Classification is: ", rf_acc)
 # ~81.2%
 
-grad_clf = GradientBoostingClassifier(n_estimators=150,learning_rate=0.1,max_depth=2,loss="deviance")
-grad_clf.fit(X_train,y_train)
-grad_predicts = grad_clf.predict(X_test)
+# Grid Search to tune our Random Forest
+rf_params = {'n_estimators': (10,100,200), "max_depth":(2,5,10)}
+grid_rf = GridSearchCV(rf_clf,rf_params)
+grid_rf.fit(X_train_reduced,y_train)
+grid_rf_predicts = grid_rf.predict(X_test_reduced)
 
+grid_rf_acc = accuracy_score(grid_rf_predicts,y_test)
+print("The accuracy of Random Forest Classification is: ", grid_rf_acc)
+
+# Gradient Boosting Classifier
+grad_clf = GradientBoostingClassifier(n_estimators=150,learning_rate=0.1,max_depth=2,loss="deviance")
+grad_clf.fit(X_train_reduced,y_train)
+grad_predicts = grad_clf.predict(X_test_reduced)
+ 
 grad_acc = accuracy_score(grad_predicts,y_test)
 grad_mse = mean_squared_error(grad_predicts,y_test)
+
+# ADD BEST FEATURES HERE
 
 print("The MSE for Gradient Boosting is : ", grad_mse)
 print("The accuracy of Gradient Boosted Classification is: ", grad_acc)
 # ~82 %s
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
