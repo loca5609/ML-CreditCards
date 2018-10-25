@@ -196,13 +196,30 @@ grad_predicts = grad_clf.predict(X_test_reduced)
 grad_acc = accuracy_score(grad_predicts,y_test)
 grad_mse = mean_squared_error(grad_predicts,y_test)
 
+
 # ADD BEST FEATURES HERE
 
 print("The MSE for Gradient Boosting is : ", grad_mse)
 print("The accuracy of Gradient Boosted Classification is: ", grad_acc)
 # ~82 %s
 
+voting_clf = VotingClassifier(
+estimators=[('lr', log_clf), ('rf', rf_clf), ('svc', svm)],
+voting='hard'
+)
+
+
+voting_clf.fit(X_train, y_train)
+for clf in (log_clf, rf_clf, svm, voting_clf):
+    clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
+    if(clf.__class__.__name__ == "VotingClassifier"):
+        print(y_pred)
+    print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
  
+
+
+
 
 
 
